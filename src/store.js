@@ -13,7 +13,7 @@ Corpus.openCorpus("taisho",function(err,engine){
 	if (err) console.log(err);
 	else corpus=engine;
 });
-var addresspat=/@t?(\d+p\d+[a-c]\d+-\d+)/g;
+var addresspat=/@t?(\d+p\d+[a-c]\d+-\d?[a-c]?\d+)/g;
 const composetext=function(t,cb){
 	var address=[];
 	t.replace(addresspat,function(m,m1){

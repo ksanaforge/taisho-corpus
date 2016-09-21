@@ -12,11 +12,10 @@ const TaishoPanel=React.createClass({
 		getter:PT.func
 	}
 	,componentDidMount:function(){
-		setTimeout(this.composetext,100);
+		setTimeout(this.composetext,1000);//wait for corpus to open
 	}
 	,composetext:function(){
 		this.context.getter("composetext",this.state.value,(data)=>{
-			console.log(data)
 			this.context.action("oncomposetext",data);
 		});
 	}
@@ -26,6 +25,8 @@ const TaishoPanel=React.createClass({
 	}
 	,render:function(){
 		return E("div",{},
+			E("a",{target:"_new",href:"http://ya.ksana.tw/taishonote/"},"taisho range selector"),
+			E("br"),
 			E("textarea",{className:"input",
 				cols:40,rows:20,onChange:this.onChange,value:this.state.value})
 		)
