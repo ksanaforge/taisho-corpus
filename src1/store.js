@@ -9,7 +9,7 @@ const gettext=function(pos,cb){
 	});
 };
 
-Corpus.openCorpus("taisho",function(err,engine){
+Corpus.openCorpus("j13",function(err,engine){
 	if (err) console.log(err);
 	else corpus=engine;
 });

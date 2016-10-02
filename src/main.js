@@ -1,36 +1,16 @@
-const React=require("react");
-const TaishoPanel=require("./taishopanel");
-const ComposerPanel=require("./composerpanel");
-const PT=React.PropTypes;
-const Model=require("./model");
-const store=require("./store");
-const E=React.createElement;
-const styles={
-  container:{display:"flex"},
-  leftpanel:{flex:1},
-  rightpanel:{flex:1}
-}
-const maincomponent = React.createClass({
+var React=require("react");
+var E=React.createElement;
+var PT=React.PropTypes;
+var CorpusNoteMode=require("ksana2015-parallel").CorpusNoteMode;
+
+var maincomponent = React.createClass({
   getInitialState:function() {
-    return {}
-  }
-  ,childContextTypes: {
-    listen: PT.func
-    ,unlistenAll: PT.func
-    ,action: PT.func
-    ,getter: PT.func
-    ,hasGetter: PT.func
-    ,registerGetter:PT.func
-    ,unregisterGetter:PT.func
-  }
-  ,getChildContext:function(){
-    return Model;
+    return {};
+  },
+  componentDidMount:function(){
   }
   ,render: function() {
-    return E("div",{style:styles.container},
-      E("div",{style:styles.leftpanel},E(TaishoPanel)),
-      E("div",{style:styles.rightpanel},E(ComposerPanel))
-    );
+    return E(CorpusNoteMode,{corpus:"taisho",address:"2p177c0201-15"});
   }
 });
 module.exports=maincomponent;

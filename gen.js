@@ -17,7 +17,7 @@ const createCorpus=require("ksana-corpus-builder").createCorpus;
 const fs=require("fs");
 const sourcepath="../../CBReader/xml/";
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
-//files.length=10;
+files.length=390;
 var prevpage;
 
 const lb=function(tag){
@@ -59,11 +59,24 @@ const note=function(tag,closing){
 const p=function(tag,closing){
 	this.putEmptyField("p");	
 }
-const bookStart=function(){
-	console.log("book start")
+const bookStart=function(n){
+	console.log("indexing volumn",n)
 }
 const bookEnd=function(){
 
+}
+const TEI=function(tag){
+	const id=tag.attributes["xml:id"];
+	if (id){
+		var sid=id.substr(id.length-5);
+		if (sid[0]==="n") sid=sid.substr(1);
+		this.putField("sid",sid);
+	}
+}
+const milestone=function(tag){
+	if (tag.attributes.unit==="juan"){
+		this.putField("juan",parseInt(tag.attributes.n,10));	
+	}
 }
 const body=function(tag,closing){
 	closing?this.stop():this.start();
@@ -76,18 +89,21 @@ const cb_mulu=function(tag,closing){
 	}
 }
 const fileStart=function(fn,i){
-	console.log(fn,i)
+	const at=fn.lastIndexOf("/");
+	fn=fn.substr(at+1);
+	fn=fn.substr(0,fn.length-4);//remove .xml
+	this.putField("file",fn);
 }
 const onFinalizeFields=function(fields){
 
 }
-const options={inputformat:"xml",bits:[6,13,5,5],column:3,
+const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",
 randomPage:true, //CBETA move t09p198a10 under t09p56c01 普門品經序
-autostart:false, removePunc:true,textOnly:true
+removePunc:true,textOnly:true
 }; //set textOnly not to build inverted
-const corpus=createCorpus("taisho",options);
+const corpus=createCorpus(options);
 corpus.setHandlers(
-	{note,lb,body,p,"cb:mulu":cb_mulu}, //open tag handlers
+	{note,lb,body,p,"cb:mulu":cb_mulu,milestone,TEI}, //open tag handlers
 	{note,body,"cb:mulu":cb_mulu},  //end tag handlers
 	{bookStart,bookEnd,fileStart}  //other handlers
 );
