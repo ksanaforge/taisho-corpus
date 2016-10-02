@@ -10,7 +10,7 @@ var maincomponent = React.createClass({
   componentDidMount:function(){
   }
   ,render: function() {
-    return E(CorpusNoteMode,{corpus:"taisho",address:"2p177c0201-15"});
+    return E(CorpusNoteMode,{corpus:"taisho",address:"2p178a0103-15"});
   }
 });
 module.exports=maincomponent;

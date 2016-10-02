@@ -3,3 +3,6 @@ body {margin:0px;background: silver}
 #main {font-size:150%;}
 .hl0 {color:red;}
 .input {background: black;color:lightgreen;font-size:150%;}
+
+.gotomarker {background:red;}
+.transclusion {font-family: DFKai-SB}
