@@ -1,16 +1,22 @@
-var React=require("react");
-var E=React.createElement;
-var PT=React.PropTypes;
-var CorpusNoteMode=require("ksana2015-parallel").CorpusNoteMode;
+/*
+ TODO : login to firebase
 
-var maincomponent = React.createClass({
+*/
+const React=require("react");
+const E=React.createElement;
+const PT=React.PropTypes;
+const CorpusNoteMode=require("ksana2015-parallel").CorpusNoteMode;
+const dataurl=require("./dataurl");
+const maincomponent = React.createClass({
   getInitialState:function() {
     return {};
   },
   componentDidMount:function(){
   }
   ,render: function() {
-    return E(CorpusNoteMode,{corpus:"taisho",address:"2p178a0103-15"});
+    return E(CorpusNoteMode,
+    	{corpus:"taisho",address:"2p178a0103-15",ControlTab:"login",dataurl}
+    );
   }
 });
 module.exports=maincomponent;
