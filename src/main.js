@@ -16,7 +16,7 @@ const maincomponent = React.createClass({
   ,render: function() {
     return E(CorpusNoteMode,
     	{corpus:"taisho",appname:"taisho-corpus",
-      address:"2p178a0103-15",control:"notetab",datapath}
+      address:"2p177b1502-04",control:"notetab",datapath}
     );
   }
 });

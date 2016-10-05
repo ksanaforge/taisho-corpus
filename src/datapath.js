@@ -10,14 +10,18 @@ var config = {
 
 firebase.initializeApp(config);
 
-var usernotes=function(key) {
+const usernotes=function(key) {
 	return firebase.database().ref("/user-notes").child(key);
 }
 
-var notes=function() {
+const notes=function() {
 	return firebase.database().ref("/notes");
 }
-var rootpath=function(path){
+const rootpath=function(path){
 	return firebase.database().ref(path);
 }
-module.exports={rootpath,notes,usernotes,firebase};
+
+const linkedBy=function(file){
+	return firebase.database().ref("/linkedBy").child(file);
+}
+module.exports={rootpath,notes,usernotes,linkedBy,firebase};

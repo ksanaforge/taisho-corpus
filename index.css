@@ -5,6 +5,7 @@ body {margin:0px;background: silver}
 .input {background: black;color:lightgreen;font-size:150%;}
 
 .gotomarker {background:red;}
+.highlight {background:rgba(255,128,0,0.7);}
 .transclusion {font-family: DFKai-SB}
-
+.linkedBy{border-bottom-style:dashed;border-width:2px;border-color:green;}
 ::-webkit-input-placeholder {color: red !important;}
