@@ -8,16 +8,16 @@ var config = {
     messagingSenderId: "791356341342"
 };
 
-const app=firebase.initializeApp(config);
+firebase.initializeApp(config);
 
-var notes=function(key) {
-	return firebase.database().ref("/notes");
+var usernotes=function(key) {
+	return firebase.database().ref("/user-notes");
 }
 
-var user=function() {
-	return firebase.database().ref("/");
+var notes=function() {
+	return firebase.database().ref("/notes");
 }
 var rootpath=function(path){
 	return firebase.database().ref(path);
 }
-module.exports={rootpath,user,notes,app,firebase};
+module.exports={rootpath,notes,usernotes,firebase};

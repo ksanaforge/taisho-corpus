@@ -6,7 +6,7 @@ const React=require("react");
 const E=React.createElement;
 const PT=React.PropTypes;
 const CorpusNoteMode=require("ksana2015-parallel").CorpusNoteMode;
-const dataurl=require("./dataurl");
+const datapath=require("./datapath");
 const maincomponent = React.createClass({
   getInitialState:function() {
     return {};
@@ -15,7 +15,8 @@ const maincomponent = React.createClass({
   }
   ,render: function() {
     return E(CorpusNoteMode,
-    	{corpus:"taisho",address:"2p178a0103-15",ControlTab:"login",dataurl}
+    	{corpus:"taisho",appname:"taisho-corpus",
+      address:"2p178a0103-15",control:"notetab",datapath}
     );
   }
 });
