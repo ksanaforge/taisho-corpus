@@ -11,7 +11,7 @@ var config = {
 firebase.initializeApp(config);
 
 var usernotes=function(key) {
-	return firebase.database().ref("/user-notes");
+	return firebase.database().ref("/user-notes").child(key);
 }
 
 var notes=function() {
