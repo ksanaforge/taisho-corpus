@@ -9,8 +9,6 @@ paste address and jump to the juan and highlight text
 paste a serial of address,
 return a json structure , containing all the text.
 
-send to Sujato for testing
-
 */
 const Ksanapos=require("ksana-corpus/ksanapos");
 const createCorpus=require("ksana-corpus-builder").createCorpus;
@@ -18,15 +16,17 @@ const fs=require("fs");
 const sourcepath="../../CBReader/xml/";
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
 files.length=390;
+//files.length=29;
 var prevpage;
 
 const lb=function(tag){
+	if (!this.started)return; //ignore lb in apparatus after </body>
+
 	const s=this.popBaseText();
 	const pbn=tag.attributes.n;
 	const page=(parseInt(pbn,10)-1)*3 + (pbn.charCodeAt(4)-0x61);
 	const line=parseInt(pbn.substr(5))-1;
 	const pb=pbn.substr(0,4);
-	if (!this.started)return; //ignore lb in apparatus after </body>
 
 	this.putLine(s);
 
