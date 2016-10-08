@@ -57,7 +57,7 @@ const note=function(tag,closing){
 }
 
 const p=function(tag,closing){
-	this.putEmptyField("p");	
+	this.putEmptyBookField("p");
 }
 const bookStart=function(n){
 	console.log("indexing volumn",n)
@@ -109,7 +109,6 @@ corpus.setHandlers(
 );
 
 files.forEach(fn=>corpus.addFile(sourcepath+fn));
-
 corpus.writeKDB("taisho.cor",function(byteswritten){
 	console.log(byteswritten,"bytes written")
 });
