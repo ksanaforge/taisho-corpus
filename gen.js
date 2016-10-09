@@ -57,7 +57,8 @@ const note=function(tag,closing){
 }
 
 const p=function(tag,closing){
-	this.putEmptyBookField("p");
+	if (closing || !this.started) return;
+	this.putEmptyBookField("p");	
 }
 const bookStart=function(n){
 	console.log("indexing volumn",n)
@@ -89,10 +90,13 @@ const cb_mulu=function(tag,closing){
 	}
 }
 const fileStart=function(fn,i){
+
 	const at=fn.lastIndexOf("/");
 	fn=fn.substr(at+1);
 	fn=fn.substr(0,fn.length-4);//remove .xml
-	this.putField("file",fn);
+	var kpos=this.kPos;
+	if (this.kPos) kpos=this.nextLineStart(this.kPos); //this.kPos point to last char of previos file
+	this.putField("file",fn,kpos);
 }
 const onFinalizeFields=function(fields){
 

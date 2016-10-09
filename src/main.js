@@ -15,8 +15,10 @@ const maincomponent = React.createClass({
   }
   ,render: function() {
     return E(CorpusNoteMode,
-    	{corpus:"taisho",appname:"taisho-corpus",
-      address:"2p177b1502-04",control:"notetab",datapath}
+    	{corpus:"taisho",appname:"taisho-corpus",control:"notetab",datapath,
+      address:"1p1b1216-1301"} 
+      //address:"2p177b1502-04"}
+      //address:"1p176a0103-15"}      
     );
   }
 });
