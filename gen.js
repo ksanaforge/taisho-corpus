@@ -90,26 +90,37 @@ const cb_mulu=function(tag,closing){
 	}
 }
 const fileStart=function(fn,i){
-
 	const at=fn.lastIndexOf("/");
 	fn=fn.substr(at+1);
 	fn=fn.substr(0,fn.length-4);//remove .xml
 	var kpos=this.kPos;
-	if (this.kPos) kpos=this.nextLineStart(this.kPos); //this.kPos point to last char of previos file
-	this.putField("file",fn,kpos);
+	if (this.kPos>1) kpos=this.nextLineStart(this.kPos); //this.kPos point to last char of previos file
+	this.articlePos=kpos;
+	//TODO , fill article name
+}
+const cbjhead=function(tag,closing){
+	if (closing) {
+		this.juantitle=this.popText();
+	} else {
+		return true;
+	}
+}
+const fileEnd=function(){
+	this.putField("article",this.juantitle,this.articlePos);
 }
 const onFinalizeFields=function(fields){
 
 }
 const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",
 randomPage:true, //CBETA move t09p198a10 under t09p56c01 普門品經序
-removePunc:true,textOnly:true
+removePunc:true,textOnly:true,
+maxTextStackDepth:3//cb:jhead might have note inside
 }; //set textOnly not to build inverted
 const corpus=createCorpus(options);
 corpus.setHandlers(
-	{note,lb,body,p,"cb:mulu":cb_mulu,milestone,TEI}, //open tag handlers
-	{note,body,"cb:mulu":cb_mulu},  //end tag handlers
-	{bookStart,bookEnd,fileStart}  //other handlers
+	{"cb:jhead":cbjhead,note,lb,body,p,"cb:mulu":cb_mulu,milestone,TEI}, //open tag handlers
+	{"cb:jhead":cbjhead,note,body,"cb:mulu":cb_mulu},  //end tag handlers
+	{bookStart,bookEnd,fileStart,fileEnd}  //other handlers
 );
 
 files.forEach(fn=>corpus.addFile(sourcepath+fn));
