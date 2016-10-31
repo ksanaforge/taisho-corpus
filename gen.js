@@ -35,7 +35,7 @@ const lb=function(tag){
 	}
 
 	if (this.bookCount){
-		const kpos=this.makeKPos(this.bookCount-1,page,line,0);
+		const kpos=this.makeKPos(this.bookCount,page,line,0);
 		this.newLine(kpos, this.tPos);
 	}
 	prevpage=pb;
@@ -47,7 +47,7 @@ const note=function(tag,closing){
 	if (closing){
 		if (tag.attributes.place==="inline"){
 			var s=this.popText();
-			if (s) this.putField("note",s);
+			if (s) this.putBookField("note",s);
 		}
 	} else {
 		if (tag.attributes.place==="inline"){
@@ -83,10 +83,9 @@ const body=function(tag,closing){
 	closing?this.stop():this.start();
 }
 const cb_mulu=function(tag,closing){
-	if (closing) {
-		var s=this.popText();
-	} else {
-		return true;//push text
+	const depth=parseInt(tag.attributes.level);
+	if (depth) {
+		return this.handlers.head_subtree.call(this,tag,closing,depth);
 	}
 }
 const fileStart=function(fn,i){
