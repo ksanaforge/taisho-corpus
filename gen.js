@@ -15,7 +15,9 @@ const createCorpus=require("ksana-corpus-builder").createCorpus;
 const fs=require("fs");
 const sourcepath="../../CBReader/xml/";
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
-files.length=390;
+//files.length=390;
+//files.length=4903; //first 25volume
+//for (var i=0;i<3648;i++) files.shift();
 //files.length=29;
 var prevpage;
 
@@ -37,7 +39,11 @@ const lb=function(tag){
 	if (this.bookCount){
 		const kpos=this.makeKPos(this.bookCount,page,line,0);
 		this.newLine(kpos, this.tPos);
+		if (!this.articlePos){
+			this.articlePos=kpos;
+		}
 	}
+
 	prevpage=pb;
 }
 
@@ -83,6 +89,7 @@ const body=function(tag,closing){
 	closing?this.stop():this.start();
 }
 const cb_mulu=function(tag,closing){
+	//subtoc_range[2996] negative 76102944 , 75673824
 	const depth=parseInt(tag.attributes.level);
 	if (depth) {
 		return this.handlers.head_subtree.call(this,tag,closing,depth);
@@ -92,20 +99,18 @@ const fileStart=function(fn,i){
 	const at=fn.lastIndexOf("/");
 	fn=fn.substr(at+1);
 	fn=fn.substr(0,fn.length-4);//remove .xml
-	var kpos=this.kPos;
-	if (this.kPos>1) kpos=this.nextLineStart(this.kPos); //this.kPos point to last char of previos file
-	this.articlePos=kpos;
-	//TODO , fill article name
+	this.articlePos=0;//reset articlePos, first lb will set articlePos
 }
 const cbjhead=function(tag,closing){
 	if (closing) {
 		this.juantitle=this.popText();
+		this.addText(this.juantitle);
 	} else {
 		return true;
 	}
 }
 const fileEnd=function(){
-	this.putField("article",this.juantitle,this.articlePos);
+	this.putArticle(this.juantitle,this.articlePos);
 }
 const onFinalizeFields=function(fields){
 
@@ -117,7 +122,7 @@ maxTextStackDepth:3//cb:jhead might have note inside
 }; //set textOnly not to build inverted
 const corpus=createCorpus(options);
 corpus.setHandlers(
-	{"cb:jhead":cbjhead,note,lb,body,p,"cb:mulu":cb_mulu,milestone,TEI}, //open tag handlers
+	{"cb:jhead":cbjhead,note,lb,body,p,milestone,TEI,"cb:mulu":cb_mulu}, //open tag handlers
 	{"cb:jhead":cbjhead,note,body,"cb:mulu":cb_mulu},  //end tag handlers
 	{bookStart,bookEnd,fileStart,fileEnd}  //other handlers
 );
