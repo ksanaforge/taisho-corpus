@@ -15,7 +15,7 @@ const createCorpus=require("ksana-corpus-builder").createCorpus;
 const fs=require("fs");
 const sourcepath="../../CBReader/xml/";
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
-//files.length=390;
+files.length=390;  //first 2 volumn
 //files.length=4903; //first 25volume
 //for (var i=0;i<3648;i++) files.shift();
 //files.length=29;
@@ -41,6 +41,7 @@ const lb=function(tag){
 		this.newLine(kpos, this.tPos);
 		if (!this.articlePos){
 			this.articlePos=kpos;
+			this.articleTPos=this.tPos;
 		}
 	}
 
@@ -72,14 +73,27 @@ const bookStart=function(n){
 const bookEnd=function(){
 
 }
+const jinfromjuantitle=function(juantitle){
+	const at=juantitle.lastIndexOf("卷");
+	if (at>0) {
+		return juantitle.substr(0,at);
+	}
+	return juantitle;
+}
+
 const TEI=function(tag){
 	const id=tag.attributes["xml:id"];
 	if (id){
 		var sid=id.substr(id.length-5);
 		if (sid[0]==="n") sid=sid.substr(1);
-		this.putField("sid",sid);
+		if (this.sid!==sid) {
+			newsid=true;
+		}
+		this.sid=sid;
+
 	}
 }
+
 const milestone=function(tag){
 	if (tag.attributes.unit==="juan"){
 		this.putField("juan",parseInt(tag.attributes.n,10));	
@@ -109,15 +123,26 @@ const cbjhead=function(tag,closing){
 		return true;
 	}
 }
+var newsid=false;
+const addGroup=function(){
+	if (newsid) {
+		const jintitle=jinfromjuantitle(this.juantitle);
+		console.log(this.sid,jintitle,'kpos',this.articlePos,'tpos',this.articleTPos);
+		this.putGroup( this.sid+";"+jintitle,this.articlePos,this.articleTPos);
+		newsid=false;
+	}
+}
+
 const fileEnd=function(){
-	this.putArticle(this.juantitle,this.articlePos);
+	this.putArticle(this.juantitle,this.articlePos,this.articleTPos);
+	addGroup.call(this);
 }
 const onFinalizeFields=function(fields){
 
 }
 const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",
 randomPage:true, //CBETA move t09p198a10 under t09p56c01 普門品經序
-removePunc:true,textOnly:true,
+removePunc:true, //textOnly:true,
 maxTextStackDepth:3//cb:jhead might have note inside
 }; //set textOnly not to build inverted
 const corpus=createCorpus(options);
