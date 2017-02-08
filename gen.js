@@ -15,10 +15,13 @@ const createCorpus=require("ksana-corpus-builder").createCorpus;
 const fs=require("fs");
 const sourcepath="../../CBReader/xml/";
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
-files.length=390;  //first 2 volumn
+//files.length=390;  //first 2 volumn
 //files.length=4903; //first 25volume
-//for (var i=0;i<3648;i++) files.shift();
-//files.length=29;
+//for (var i=0;i<3917;i++) files.shift();
+for (var i=0;i<7728;i++) files.shift();
+
+//for (var i=0;i<300;i++) files.shift();
+//files.length=300;
 var prevpage;
 
 const lb=function(tag){
@@ -26,7 +29,12 @@ const lb=function(tag){
 
 	const s=this.popBaseText();
 	const pbn=tag.attributes.n;
-	const page=(parseInt(pbn,10)-1)*3 + (pbn.charCodeAt(4)-0x61);
+	const col=pbn.charCodeAt(4);
+	if (col>=0x64) { //column d
+		console.log("ignore column d,e",pbn)
+		return; //ignore T21n1308_001 0429d01, 0437e01
+	} 
+	const page=(parseInt(pbn,10)-1)*3 + (col-0x61);
 	const line=parseInt(pbn.substr(5))-1;
 	const pb=pbn.substr(0,4);
 
@@ -98,7 +106,8 @@ const milestone=function(tag){
 	if (tag.attributes.unit==="juan"){
 		this.putField("juan",parseInt(tag.attributes.n,10));	
 	}
-}
+} 
+
 const body=function(tag,closing){
 	closing?this.stop():this.start();
 }
@@ -141,7 +150,7 @@ const onFinalizeFields=function(fields){
 
 }
 const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",
-randomPage:true, //CBETA move t09p198a10 under t09p56c01 普門品經序
+randomPage:false, //CBETA move t09p198a10 under t09p56c01 普門品經序
 removePunc:true, //textOnly:true,
 maxTextStackDepth:3//cb:jhead might have note inside
 }; //set textOnly not to build inverted
@@ -161,3 +170,9 @@ console.log(corpus.totalPosting,corpus.tPos);
 fs.writeFileSync("disorderPages.json",JSON.stringify(corpus.disorderPages,""," "),"utf8");
 fs.writeFileSync("longlines.json",JSON.stringify(corpus.longLines,""," "),"utf8");
 
+
+/* negative
+
+41600 prev: 30113639 now: 30113095 key: [ null, 'inverted', 'line2tpos' ]
+
+*/
