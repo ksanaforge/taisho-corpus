@@ -7,7 +7,7 @@ const processbulei=function(line){
 	const m=line.match(/^(\d+) (.*?) /);
 	if (m) {
 			bcode=parseInt(m[1]);
-			buleiname.push(m[2]);			
+			if (bcode<=20) buleiname.push(m[2]);	 //taisho has only 20 bulei
 	} else {
 			const sutra=line.match(/T\d+n(\d+[a-zA-Z]?)/);
 			if (sutra) {
