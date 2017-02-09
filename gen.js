@@ -18,10 +18,7 @@ const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
 //files.length=390;  //first 2 volumn
 //files.length=4903; //first 25volume
 //for (var i=0;i<3917;i++) files.shift();
-for (var i=0;i<7728;i++) files.shift();
-
-//for (var i=0;i<300;i++) files.shift();
-//files.length=300;
+//files.length=390;
 var prevpage;
 
 const lb=function(tag){
@@ -98,7 +95,6 @@ const TEI=function(tag){
 			newsid=true;
 		}
 		this.sid=sid;
-
 	}
 }
 
@@ -133,11 +129,17 @@ const cbjhead=function(tag,closing){
 	}
 }
 var newsid=false;
+const sid2bulei=require("./sid2bulei");
+const getBulei=function(sid){
+	return sid2bulei[sid] || 0;
+}
+const buleiname=require("./buleiname");
 const addGroup=function(){
 	if (newsid) {
 		const jintitle=jinfromjuantitle(this.juantitle);
-		console.log(this.sid,jintitle,'kpos',this.articlePos,'tpos',this.articleTPos);
-		this.putGroup( this.sid+";"+jintitle,this.articlePos,this.articleTPos);
+		const bulei=getBulei(this.sid);
+		console.log(this.sid,jintitle,buleiname[bulei],'kpos',this.articlePos,'tpos',this.articleTPos);
+		this.putGroup( this.sid+";"+bulei+"@"+jintitle,this.articlePos,this.articleTPos);
 		newsid=false;
 	}
 }
@@ -152,7 +154,8 @@ const onFinalizeFields=function(fields){
 const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",
 randomPage:false, //CBETA move t09p198a10 under t09p56c01 普門品經序
 removePunc:true, //textOnly:true,
-maxTextStackDepth:3//cb:jhead might have note inside
+maxTextStackDepth:3,//cb:jhead might have note inside
+groupPrefix:buleiname
 }; //set textOnly not to build inverted
 const corpus=createCorpus(options);
 corpus.setHandlers(
