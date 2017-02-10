@@ -17,10 +17,10 @@ const sourcepath="../../CBReader/xml/";
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
 //files.length=390;  //first 2 volumn
 //files.length=4903; //first 25volume
-//for (var i=0;i<3917;i++) files.shift();
-//files.length=390;
+//for (var i=0;i<4761;i++) files.shift();
+//files.length=120;
 var prevpage;
-
+var inP=false;
 const lb=function(tag){
 	if (!this.started)return; //ignore lb in apparatus after </body>
 
@@ -49,6 +49,9 @@ const lb=function(tag){
 			this.articleTPos=this.tPos;
 		}
 	}
+	if (!inP) { //if not a paragraph , every lb start a new paragraph (for lg and l)
+		this.putEmptyBookField("p");
+	}
 
 	prevpage=pb;
 }
@@ -69,8 +72,13 @@ const note=function(tag,closing){
 }
 
 const p=function(tag,closing){
-	if (closing || !this.started) return;
-	this.putEmptyBookField("p");	
+	if (!this.started) return;
+	if (closing) {
+		inP=false;
+	} else {
+		inP=true;
+		this.putEmptyBookField("p");
+	}
 }
 const bookStart=function(n){
 	console.log("indexing volumn",n)
@@ -131,7 +139,11 @@ const cbjhead=function(tag,closing){
 var newsid=false;
 const sid2bulei=require("./sid2bulei");
 const getBulei=function(sid){
-	return sid2bulei[sid] || 0;
+	var b=sid2bulei[sid] || 0;
+	if (b==0 && parseInt(sid)==220) {
+		b=sid2bulei["0220"]; //大般若經 cross volumn
+	}
+	return b;
 }
 const buleiname=require("./buleiname");
 const addGroup=function(){
@@ -160,7 +172,7 @@ groupPrefix:buleiname
 const corpus=createCorpus(options);
 corpus.setHandlers(
 	{"cb:jhead":cbjhead,note,lb,body,p,milestone,TEI,"cb:mulu":cb_mulu}, //open tag handlers
-	{"cb:jhead":cbjhead,note,body,"cb:mulu":cb_mulu},  //end tag handlers
+	{"cb:jhead":cbjhead,note,body,p,"cb:mulu":cb_mulu},  //end tag handlers
 	{bookStart,bookEnd,fileStart,fileEnd}  //other handlers
 );
 
