@@ -115,11 +115,40 @@ const milestone=function(tag){
 const body=function(tag,closing){
 	closing?this.stop():this.start();
 }
+var EA_pin="";
 const cb_mulu=function(tag,closing){
 	//subtoc_range[2996] negative 76102944 , 75673824
-	const depth=parseInt(tag.attributes.level);
-	if (depth) {
-		return this.handlers.head_subtree.call(this,tag,closing,depth);
+
+	if (closing){
+		const mulutext=this.popText();
+		this.addText(mulutext);
+		const depth=parseInt(tag.attributes.level);
+
+		if (depth==1&&this.sid=="0125" && tag.attributes.type=="品") {
+			EA_pin=parseInt(tag.attributes.n,10);
+		}
+		if (this.sid=="0100" &&tag.attributes.level==2&&tag.attributes.type=="其他"){
+			//不知道為什麼 type不是"經"
+			this.putField("subsid@"+this.sid,parseInt(mulutext,10));
+		}
+		if (tag.attributes.type=="經" && depth>=2) { //n26 depth=3, n99 depth=2
+			var n=parseInt(tag.attributes.n,10);
+			if (isNaN(n)) {
+				n=parseInt(parseInt(mulutext),10);
+			}
+			if (n) {
+				if (this.sid=="0125") {
+					n=EA_pin+"."+n;
+				}
+				this.putField("subsid@"+this.sid,n);
+			}
+		}
+	} else {
+		const depth=parseInt(tag.attributes.level);
+		if (depth) {
+			return this.handlers.head_subtree.call(this,tag,closing,depth);
+		}
+		return true;
 	}
 }
 const fileStart=function(fn,i){
@@ -167,7 +196,8 @@ const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",
 randomPage:false, //CBETA move t09p198a10 under t09p56c01 普門品經序
 removePunc:true, //textOnly:true,
 maxTextStackDepth:3,//cb:jhead might have note inside
-groupPrefix:buleiname
+groupPrefix:buleiname,
+title:"大正新修大藏經"
 }; //set textOnly not to build inverted
 const corpus=createCorpus(options);
 corpus.setHandlers(
