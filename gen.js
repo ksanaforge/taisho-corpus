@@ -10,15 +10,21 @@ paste a serial of address,
 return a json structure , containing all the text.
 
 */
+//your CBREADER 2016 XML path
+const sourcepath="../../CBReader/xml/";
+
+
+
+
+
+
 var createCorpus=null
 try {
 	createCorpus=require("ksana-corpus-builder").createCorpus;
 } catch(e){
 	createCorpus=require("ksana-corpus-lib").createCorpus;
 }
-const Ksanapos=require("ksana-corpus/ksanapos");
 const fs=require("fs");
-const sourcepath="../../CBReader/xml/";
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
 
 //files.length=390;  //first 2 volumn
