@@ -10,11 +10,17 @@ paste a serial of address,
 return a json structure , containing all the text.
 
 */
+var createCorpus=null
+try {
+	createCorpus=require("ksana-corpus-builder").createCorpus;
+} catch(e){
+	createCorpus=require("ksana-corpus-lib").createCorpus;
+}
 const Ksanapos=require("ksana-corpus/ksanapos");
-const createCorpus=require("ksana-corpus-builder").createCorpus;
 const fs=require("fs");
 const sourcepath="../../CBReader/xml/";
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
+
 //files.length=390;  //first 2 volumn
 //files.length=4903; //first 25volume
 //for (var i=0;i<4761;i++) files.shift();
@@ -48,9 +54,10 @@ const lb=function(tag){
 			this.articlePos=kpos;
 			this.articleTPos=this.tPos;
 		}
-	}
-	if (!inP) { //if not a paragraph , every lb start a new paragraph (for lg and l)
-		this.putEmptyBookField("p");
+		if (!inP) { //if not a paragraph , every lb start a new paragraph (for lg and l)
+			this.putEmptyArticleField("p",kpos,this.articleCount);
+		}
+
 	}
 
 	prevpage=pb;
@@ -77,7 +84,8 @@ const p=function(tag,closing){
 		inP=false;
 	} else {
 		inP=true;
-		this.putEmptyBookField("p");
+		//unlike other kdb, putArticle to increment articleCount comes after fileend, so we need to pass articleCount
+		this.putEmptyArticleField("p",this.kPos,this.articleCount);
 	}
 }
 const bookStart=function(n){
@@ -118,24 +126,25 @@ const body=function(tag,closing){
 var EA_pin="";
 const cb_mulu=function(tag,closing){
 	//subtoc_range[2996] negative 76102944 , 75673824
-
-	if (closing){
+	const depth=parseInt(tag.attributes.level);
+	if (closing) {
 		const mulutext=this.popText();
-		this.addText(mulutext);
+		/// this.addText(mulutext);  //MULU TEXT is not part of Taisho
 		const depth=parseInt(tag.attributes.level);
 
 		if (depth==1&&this.sid=="0125" && tag.attributes.type=="品") {
 			EA_pin=parseInt(tag.attributes.n,10);
 		}
+
 		if (this.sid=="0100" &&tag.attributes.level==2&&tag.attributes.type=="其他"){
 			//不知道為什麼 type不是"經"
 			this.putField("subsid@"+this.sid,parseInt(mulutext,10));
 		}
 		if (tag.attributes.type=="經" && depth>=2) { //n26 depth=3, n99 depth=2
-			var n=parseInt(tag.attributes.n,10);
-			if (isNaN(n)) {
-				n=parseInt(parseInt(mulutext),10);
-			}
+			//var n=parseInt(tag.attributes.n,10);  n 不對 
+			//if (isNaN(n)) {
+			var n=parseInt(parseInt(mulutext),10);
+			//}
 			if (n) {
 				if (this.sid=="0125") {
 					n=EA_pin+"."+n;
@@ -143,11 +152,9 @@ const cb_mulu=function(tag,closing){
 				this.putField("subsid@"+this.sid,n);
 			}
 		}
+		this.handlers.head_subtree.call(this,tag,closing,depth);
 	} else {
-		const depth=parseInt(tag.attributes.level);
-		if (depth) {
-			return this.handlers.head_subtree.call(this,tag,closing,depth);
-		}
+		if (depth) this.handlers.head_subtree.call(this,tag,closing,depth);
 		return true;
 	}
 }
@@ -179,7 +186,7 @@ const addGroup=function(){
 	if (newsid) {
 		const jintitle=jinfromjuantitle(this.juantitle);
 		const bulei=getBulei(this.sid);
-		console.log(this.sid,jintitle,buleiname[bulei],'kpos',this.articlePos,'tpos',this.articleTPos);
+		console.log(this.sid,jintitle,buleiname[bulei],'kpos',this.stringify(this.articlePos),'tpos',this.articleTPos);
 		this.putGroup( this.sid+";"+bulei+"@"+jintitle,this.articlePos,this.articleTPos);
 		newsid=false;
 	}
@@ -190,9 +197,23 @@ const fileEnd=function(){
 	addGroup.call(this);
 }
 const onFinalizeFields=function(fields){
-
 }
-const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",
+
+
+const finalize=function(){
+	const mpps_fields_note=require("../mpps_lecture/mpps_fields_note.json");
+	const mpps_fields_head=require("../mpps_lecture/mpps_fields_head.json");
+	const mpps_fields_jin=require("../mpps_lecture/mpps_fields_jin.json");
+	this.importExternalMarkup(mpps_fields_note);
+	this.importExternalMarkup(mpps_fields_head);
+	this.importExternalMarkup(mpps_fields_jin);
+}
+const bigrams={};
+
+require("./bigrams").split(" ").forEach((bi)=>bigrams[bi]=true);
+
+const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",bigrams,
+articleFields:["mppsnote","kepan","jin","p"],
 randomPage:false, //CBETA move t09p198a10 under t09p56c01 普門品經序
 removePunc:true, //textOnly:true,
 maxTextStackDepth:3,//cb:jhead might have note inside
@@ -203,10 +224,13 @@ const corpus=createCorpus(options);
 corpus.setHandlers(
 	{"cb:jhead":cbjhead,note,lb,body,p,milestone,TEI,"cb:mulu":cb_mulu}, //open tag handlers
 	{"cb:jhead":cbjhead,note,body,p,"cb:mulu":cb_mulu},  //end tag handlers
-	{bookStart,bookEnd,fileStart,fileEnd}  //other handlers
+	{bookStart,bookEnd,fileStart,fileEnd,finalize}  //other handlers
 );
 
-files.forEach(fn=>corpus.addFile(sourcepath+fn));
+files.forEach(function(fn){
+	const sourcefile=fn[0]=="."?fn:sourcepath+fn;
+	corpus.addFile(sourcefile);	
+});
 corpus.writeKDB("taisho.cor",function(byteswritten){
 	console.log(byteswritten,"bytes written")
 });
