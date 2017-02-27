@@ -134,7 +134,7 @@ const cb_mulu=function(tag,closing){
 	//subtoc_range[2996] negative 76102944 , 75673824
 	const depth=parseInt(tag.attributes.level);
 	if (closing) {
-		const mulutext=this.popText();
+		const mulutext=this.peekText();
 		/// this.addText(mulutext);  //MULU TEXT is not part of Taisho
 		const depth=parseInt(tag.attributes.level);
 
