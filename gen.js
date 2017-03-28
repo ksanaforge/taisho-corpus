@@ -21,8 +21,9 @@ try {
 }
 const fs=require("fs");
 const files=fs.readFileSync("taisho.lst","utf8").split(/\r?\n/);
-//files.length=2244;//
+//files.length=2244;
 //files.length=390;  //first 2 volumn
+
 //files.length=4903; //first 25volume
 //for (var i=0;i<4761;i++) files.shift();
 //files.length=120;
@@ -63,15 +64,9 @@ const lb=function(tag){
 //t03n0190_004.xml: 0669c28 has inline note
 //雙行夾注
 const note=function(tag,closing,kpos,tpos,start,end){
-	if (closing){
-		if (tag.attributes.place==="inline"){
-			var s=this.substring(start,end);
-			if (s) this.putBookField("note",s);
-		}
-	} else {
-		if (tag.attributes.place==="inline"){
-			return true;
-		}
+	if (closing && tag.attributes.place==="inline"){
+		var s=this.substring(start,end);
+		if (s) this.putArticleField("note",s);
 	}
 }
 
@@ -206,13 +201,15 @@ const bigrams={};
 
 require("./bigrams").split(" ").forEach((bi)=>bigrams[bi]=true);
 
-const options={inputFormat:"xml",bitPat:"taisho",name:"taisho",bigrams,
+const options={inputFormat:"xml",id:"taisho",
+external:{bigrams},
 articleFields:["mppsnote","kepan","jin","p"],
 randomPage:false, //CBETA move t09p198a10 under t09p56c01 普門品經序
 removePunc:true, //textOnly:true,
 groupPrefix:buleiname,
 title:"大正新修大藏經"
 }; //set textOnly not to build inverted
+console.time("build");
 const corpus=createCorpus(options);
 corpus.setHandlers(
 	{head:nop,"cb:jhead":cbjhead,note,lb,body,p,milestone,TEI,"cb:mulu":cb_mulu}, //open tag handlers
@@ -228,10 +225,9 @@ corpus.writeKDB("taisho.cor",function(byteswritten){
 	console.log(byteswritten,"bytes written")
 });
 //console.log(corpus.romable.buildROM({date:(new Date()).toString()}));
-console.log(corpus.totalPosting,corpus.tPos);
 fs.writeFileSync("disorderPages.json",JSON.stringify(corpus.disorderPages,""," "),"utf8");
 fs.writeFileSync("longlines.json",JSON.stringify(corpus.longLines,""," "),"utf8");
-
+console.timeEnd("build");
 
 /* negative
 
