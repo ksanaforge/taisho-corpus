@@ -203,7 +203,6 @@ require("./bigrams").split(" ").forEach((bi)=>bigrams[bi]=true);
 
 const options={inputFormat:"xml",id:"taisho",
 external:{bigrams},
-articleFields:["mppsnote","kepan","jin","p"],
 randomPage:false, //CBETA move t09p198a10 under t09p56c01 普門品經序
 removePunc:true, //textOnly:true,
 groupPrefix:buleiname,
