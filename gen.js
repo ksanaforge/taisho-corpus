@@ -64,6 +64,9 @@ const lb=function(tag){
 //t03n0190_004.xml: 0669c28 has inline note
 //雙行夾注
 const note=function(tag,closing,kpos,tpos,start,end){
+	if (!closing) {
+		return true; //drop the note text
+	}
 	if (closing && tag.attributes.place==="inline"){
 		var s=this.substring(start,end);
 		if (s) this.putArticleField("note",s);
@@ -147,6 +150,10 @@ const cb_mulu=function(tag,closing,kpos,tpos,start,end){
 			this._divdepth=depth;
 			this.handlers.head.apply(this,arguments);
 		}
+	} else {
+		//cb:mulu is not part of taisho text
+		//capture the text, to avoid line too long warings.
+		return true; 
 	}
 }
 const fileStart=function(fn,i){
@@ -206,6 +213,7 @@ external:{bigrams},
 randomPage:false, //CBETA move t09p198a10 under t09p56c01 普門品經序
 removePunc:true, //textOnly:true,
 groupPrefix:buleiname,
+extrasize:10000000,
 title:"大正新修大藏經"
 }; //set textOnly not to build inverted
 console.time("build");
