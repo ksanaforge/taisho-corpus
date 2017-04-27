@@ -11,7 +11,7 @@ return a json structure , containing all the text.
 
 */
 //your CBREADER 2016 XML path
-const sourcepath="/CBETA2016/CBReader/xml/";
+const sourcepath="/CBETA/CBReader/xml/";
 
 var createCorpus=null
 try {
